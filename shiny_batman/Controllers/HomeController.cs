@@ -15,17 +15,18 @@ namespace shiny_batman.Controllers
             return View();
         }
 
-        public ActionResult About()
+        public ActionResult Lista()
         {
-            ViewBag.Message = "Your app description page.";
-
             return PartialView();
         }
 
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
+        public ActionResult Editar()
+        {        
+            return PartialView();
+        }
 
+        public ActionResult Visualizar()
+        {
             return PartialView();
         }
     }

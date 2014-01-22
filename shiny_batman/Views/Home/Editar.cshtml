@@ -1,0 +1,35 @@
+﻿<a href="#lista">Listar todos</a>
+
+<div ng-controller="Listar">
+    <form name="myForm" class="form-horizontal" novalidate>
+
+        <div ng-repeat="field in uimodel.fields" class="control-group" ng-class="{'has-error': myForm.campo.$invalid && myForm.campo.$dirty}">
+            <ng-form name="myForm">
+
+            <label class="control-label" ng-class="{required: field.required}" ng-model="field.label" contenteditable="true" ng-if="!field.required">{{field.label}}</label>
+            <label class="control-label" ng-class="{required: field.required}" ng-model="field.label" contenteditable="true" ng-if="field.required">{{field.label}}*</label>
+
+            <div class="controls">
+                  <div ng-class="{'input-group': field.prefix}" class="div-inline-block">
+                    <span ng-if="field.prefix" class="input-group-addon"><i class="glyphicon glyphicon-{{ field.prefix }}"></i></span>               
+                    <input id="{{field.uid}}" name="campo" type="{{field.type}}" class="form-control" ng-required="field.required" ng-model="entity[field.label]" />                      
+                </div>
+            </div>
+            </ng-form>
+        </div>         
+
+        <div class="control-group">
+            <div class="alert alert-block">
+                <button type="submit" ng-disabled="myForm.$invalid" class="btn btn-large btn-primary">Salvar</button>
+            </div>
+        </div>
+
+        <div class="splitter-left-panel" style="top: 0px; left: 0px; width: 700px;">
+            <label>
+                <input type="checkbox" ng-model="checked" />
+                &nbsp;Debug?</label>
+            <pre ng-show="checked">{{uimodel | json}}</pre>
+        </div>
+    </form>
+
+</div>
