@@ -1,0 +1,63 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+
+
+<div class="container-fluid" ng-controller="PhoneListCtrl">
+    <p>{{query}}</p>
+    <p>{{orderProp}}</p>
+    <div class="row-fluid">
+        <div class="span2">
+            <!--Sidebar content-->
+
+            Search:
+            <input ng-model="query">
+            Sort by:
+            <select ng-model="orderProp">
+                <option value="name">Alphabetical</option>
+                <option value="-age">Newest</option>
+            </select>
+        </div>
+        <div class="span10">
+            <!--Body content-->
+
+            <ul class="phones">
+                <li ng-repeat="phone in phones | filter:query | orderBy:orderProp">{{phone.name}}
+    <p>{{phone.snippet}}</p>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script type="text/javascript">
+        var phonecatApp = angular.module('phonecatApp', []);
+
+        phonecatApp.controller('PhoneListCtrl', function ($scope) {
+            $scope.phones = [
+            {
+                'name': 'Apple',
+                'snippet': 'Fast just got faster with Nexus S.',
+                'age':1
+            },
+            {
+                'name': 'Motorola',
+                'snippet': 'The Next, Next Generation tablet.',
+                'age':2
+            },
+            {
+                'name': 'Google',
+                'snippet': 'The Next, Next Generation tablet.',
+                'age': 3
+            }
+            ];
+            $scope.orderProp = 'age';
+        });
+
+      
+    </script>
+}
