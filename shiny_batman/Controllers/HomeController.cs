@@ -19,14 +19,14 @@ namespace shiny_batman.Controllers
         {
             ViewBag.Message = "Your app description page.";
 
-            return View();
+            return PartialView();
         }
 
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";
 
-            return View();
+            return PartialView();
         }
     }
 }

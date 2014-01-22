@@ -2,49 +2,38 @@
     ViewBag.Title = "Contact";
 }
 
-<hgroup class="title">
-    <h1>@ViewBag.Title.</h1>
-    <h2>@ViewBag.Message</h2>
-</hgroup>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="messages">
+            <div class="alert alert-warning" ng-repeat="entry in log">
+                {{ entry.msg }}
+            </div>
+        </div>
 
-<section class="contact">
-    <header>
-        <h3>Phone</h3>
-    </header>
-    <p>
-        <span class="label">Main:</span>
-        <span>425.555.0100</span>
-    </p>
-    <p>
-        <span class="label">After Hours:</span>
-        <span>425.555.0199</span>
-    </p>
-</section>
+        <div class="span2">
+            <!--Sidebar content-->
 
-<section class="contact">
-    <header>
-        <h3>Email</h3>
-    </header>
-    <p>
-        <span class="label">Support:</span>
-        <span><a href="mailto:Support@example.com">Support@example.com</a></span>
-    </p>
-    <p>
-        <span class="label">Marketing:</span>
-        <span><a href="mailto:Marketing@example.com">Marketing@example.com</a></span>
-    </p>
-    <p>
-        <span class="label">General:</span>
-        <span><a href="mailto:General@example.com">General@example.com</a></span>
-    </p>
-</section>
+            Search:
+            <input ng-model="query">
+            Sort by:
+    <select ng-model="orderProp">
+        <option value="name">Alphabetical</option>
+        <option value="age">Newest</option>
+    </select>
 
-<section class="contact">
-    <header>
-        <h3>Address</h3>
-    </header>
-    <p>
-        One Microsoft Way<br />
-        Redmond, WA 98052-6399
-    </p>
-</section>
+        </div>
+        <div class="span10">
+            <!--Body content-->
+
+            <ul class="phones">
+                <li ng-repeat="phone in phones | filter:query | orderBy:orderProp" class="thumbnail">
+                    <a href="#/phones/{{phone.id}}" class="thumb">
+                        <img ng-src="{{phone.imageUrl}}"></a>
+                    <a href="#/phones/{{phone.id}}">{{phone.name}}</a>
+                    <p>{{phone.snippet}}</p>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+</div>
