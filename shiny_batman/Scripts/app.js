@@ -1,56 +1,200 @@
 ﻿var phonecatApp = angular.module('phonecatApp', [
     'ngRoute',
-    'phonecatControllers'
+    'phonecatControllers',
+    'ui.bootstrap'
 ]);
+
+phonecatApp.factory('TabsData', function () {
+    var listaAbas = [];
+
+    return {
+        addTab: function (newObj) {
+            var found = false;
+            for (var i in listaAbas) {
+                if (listaAbas[i].id == newObj.id) {
+                    listaAbas[i].ativo = true;
+                    found = true;
+                }
+                else
+                    listaAbas[i].ativo = false;
+            }
+            if(!found)
+                listaAbas.push(newObj);
+        },
+        getTabs: function () {
+            return listaAbas;
+        }
+    };
+});
 
 phonecatApp.config(['$routeProvider',
 function ($routeProvider) {
     $routeProvider.
-    when('/listar', {
+    when('/', {
+        templateUrl: 'Home/Todos',
+        controller: 'Tudo'
+    }).
+    when('/listar/', {
         templateUrl: 'Home/Lista',
         controller: 'Listar'
     }).
-    when('/editar/:entityId', {
+    when('/editar/:entityId/', {
         templateUrl: 'Home/Editar',
         controller: 'EditarVisualizar'
     }).
-    when('/visualizar/:entidadeId', {
+    when('/visualizar/:entidadeId/', {
         templateUrl: 'Home/Visualizar',
         controller: 'EditarVisualizar'
     }).
     otherwise({
-        redirectTo: '/listar'
+        redirectTo: '/'
     });
 }]);
 
 var phonecatControllers = angular.module('phonecatControllers', []);
 
+
+
+function Lista($http, table) {
+    var self = this;    
+    self.table = table;
+    self.currentPage = 1;
+
+    $http.get('/Data/ListEntities/?model=' + table + '&page=' + self.currentPage + '&maxResults=10&data' + new Date().toLocaleTimeString()).success(function (data) {
+        self.fields = data.columns;        
+        self.pk = self.fields.filter(function (obj) { return (obj.link==true); })[0].name
+        self.values = data.values;
+        self.total = data.count;
+        self.rows_returned = data.results;
+        self.order = data.columns[0].name;
+    });
+    
+    self.setPage = function (pageNo) {
+        self.currentPage = pageNo;
+
+        $http.get('/Data/ListEntities/?model=' + self.table + '&page=' + pageNo + '&maxResults=10&data' + new Date().toLocaleTimeString()).success(function (data) {
+            self.fields = data.columns;
+            self.pk = self.fields.filter(function (obj) { return (obj.link == true); }).name
+            self.values = data.values;
+            self.total = data.count;
+            self.rows_returned = data.results;
+            self.order = data.columns[0].name;
+        });
+    };
+
+    self.changeOrder = function (field) {
+        if (field.order) {
+            field.order = field.order == 'asc' ? 'desc' : 'asc';
+            self.order = self.order == field.name ? '-' + field.name : field.name;
+        }
+        else {
+            for (var i in self.fields) {
+                self.fields[i].order = false;
+            }
+            field.order = 'asc';
+            self.order = field.name;
+        }
+    };
+
+    self.filters = [];
+}
+
+function Editar($http, model, id) {
+    var self = this;
+    self.model = model;
+    self.debug = false;
+    self.entityId = id;
+    // 2. UI models
+    $http.get('/Data/GetFormDefinition/?model=' + self.model + '&data' + new Date().toLocaleTimeString()).success(function (data) {
+        self.uimodel = data;
+        var fields = $scope.self.fields;
+        for (var i = 0; i < fields.length; i++) {
+            fields[i].modelo = "";
+            fields[i].uid = "ids_" + i;
+        }
+    });
+
+    $http.get('/Data/GetEntity/' + self.entityId + '?model=' + self.model + '&data' + new Date().toLocaleTimeString()).success(function (data) {
+        self.entity = data;
+    });
+
+}
+
+phonecatApp.controller('Tudo', ['$scope', '$http', '$routeParams', 'TabsData',
+    function ($scope, $http, $routeParams, TabsData) {                
+        $scope.abas = TabsData.getTabs();
+        $scope.abrirAba = function (tipo, model, id) {
+          for (var i in $scope.abas)
+                $scope.abas[i].ativo = false;
+
+            if (tipo == "lista")
+                TabsData.addTab({ "id": "cliente_" + id, "descricao": "Clientes " + id, "tipo": "lista", "ativo": true, "conteudo": new Lista($http, 'tb_pessoa') });
+            else if (tipo == "editar")
+                TabsData.addTab({ "id": "edit_" + id, "descricao": "Editar " + id, "tipo": "editar", "ativo": true, "conteudo": new Editar($http, model, id) });
+        };
+
+        $scope.ativarAba = function (item) {
+            for (var i in $scope.abas)
+                $scope.abas[i].ativo = false;
+            item.ativo = true;
+        };
+
+        $scope.removerAba = function (indice) {
+            $scope.abas.splice(indice, 1);
+            $scope.abas[indice - 1].ativo = true;
+        };
+    }
+]);
+
+phonecatApp.controller('Menu', ['$scope', '$http', 'TabsData',
+    function ($scope, $http, TabsData) {
+        $http.get('/Menu/Todos?data' + new Date().toLocaleTimeString()).success(function (data) {
+            $scope.menus = data;
+        });
+
+        $scope.executeAction = function (itemMenu) {
+            TabsData.addTab({
+                "id": itemMenu.model + "_" + itemMenu.id, "descricao": itemMenu.description,
+                "tipo": "lista", "ativo": true, "conteudo": new Lista($http, itemMenu.model)
+            });
+        };
+    }
+]);
+
 phonecatControllers.controller('Listar', ['$scope', '$http',
     function ($scope, $http) {
-        $scope.fields = [
-            {"Description":"#", "Name":"Id", "Link":true, "Order":"desc"},
-            {"Description": "Nome", "Name":"Nome", "Link":false, "Order":false}, 
-            {"Description": "Telefone", "Name":"Telefone", "Link":false, "Order":false }, 
-            { "Description": "Estado", "Name":"Estado", "Link":false, "Order":false}
-        ];
-        $scope.values = [
-            {"Id":"1", "Nome":"Danimar Ribeiro", "Telefone":"(48) 9801-6226", "Estado":"Santa Catarina"},
-            { "Id": "2", "Nome": "Beltrano e cicrano", "Telefone": "(48) 9801-6226", "Estado": "Parana" },
-            { "Id": "3", "Nome": "Fulano de tal", "Telefone": "(48) 9801-6226", "Estado": "Rio Grande do Sul" },
-        ];
+        $http.get('/Data/ListEntities/1?data' + new Date().toLocaleTimeString()).success(function (data) {
+            $scope.fields = data.columns;
+            $scope.values = data.values;
+            $scope.total = data.count;
+            $scope.rows_returned = data.results;
+            $scope.order = data.columns[0].name;
+        });
 
-        $scope.Order = "Id";
+        $scope.currentPage = 1;
+        $scope.setPage = function (pageNo) {
+            $scope.currentPage = pageNo;
+
+            $http.get('/Data/ListEntities/' + pageNo + '?data' + new Date().toLocaleTimeString()).success(function (data) {
+                $scope.fields = data.columns;
+                $scope.values = data.values;
+                $scope.total = data.count;
+                $scope.rows_returned = data.results;
+                $scope.order = data.columns[0].name;
+            });
+        };
+
         $scope.changeOrder = function (field) {
-            if (field.Order) {
-                field.Order = field.Order == 'asc' ? 'desc' : 'asc';
-                $scope.Order = $scope.Order == field.Name ? '-' + field.Name : field.Name;
+            if (field.order) {
+                field.order = field.order == 'asc' ? 'desc' : 'asc';
+                $scope.order = $scope.order == field.name ? '-' + field.name : field.name;
             }
             else {
                 for (var i in $scope.fields) {
-                    $scope.fields[i].Order = false;
+                    $scope.fields[i].order = false;
                 }
-                field.Order = 'asc';
-                $scope.Order = field.Name;
+                field.order = 'asc';
+                $scope.order = field.name;
             }
         };
 
@@ -58,13 +202,13 @@ phonecatControllers.controller('Listar', ['$scope', '$http',
     }
 ]);
 
-phonecatControllers.controller('EditarVisualizar', ['$scope', '$http','$routeParams',
+phonecatControllers.controller('EditarVisualizar', ['$scope', '$http', '$routeParams',
     function ($scope, $http, $routeParams) {
 
         $scope.entityId = $routeParams.entityId;
         $scope.debug = false;
         // 2. UI models
-        $http.get('/Data/GetFormDefinition/1').success(function (data) {            
+        $http.get('/Data/GetFormDefinition/1?data' + new Date().toLocaleTimeString()).success(function (data) {
             $scope.uimodel = data;
             var fields = $scope.uimodel.fields;
             for (var i = 0; i < fields.length; i++) {
@@ -73,8 +217,8 @@ phonecatControllers.controller('EditarVisualizar', ['$scope', '$http','$routePar
             }
         });
 
-        $http.get('/Data/GetEntity/' + $scope.entityId).success(function (data) {
-            $scope.entity = data;            
+        $http.get('/Data/GetEntity/' + $scope.entityId + '?data' + new Date().toLocaleTimeString()).success(function (data) {
+            $scope.entity = data;
         });
 
     }

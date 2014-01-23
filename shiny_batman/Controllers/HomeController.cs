@@ -20,12 +20,22 @@ namespace shiny_batman.Controllers
             return PartialView();
         }
 
+        public ActionResult Listar()
+        {
+            return PartialView();
+        }
+
         public ActionResult Editar()
         {        
             return PartialView();
         }
 
         public ActionResult Visualizar()
+        {
+            return PartialView();
+        }
+
+        public ActionResult Todos()
         {
             return PartialView();
         }

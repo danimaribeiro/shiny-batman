@@ -4,7 +4,7 @@
         </div>
     <div class="form-inline" ng-repeat="filter in filters">
         <div class="form-group">
-            <select class="form-control" ng-options="f.Name for f in fields" ng-model="field"></select>
+            <select class="form-control" ng-options="f.name for f in fields" ng-model="field"></select>
         </div>
         <div class="form-group">
             <select class="form-control">
@@ -38,35 +38,27 @@
         <table class="table table-condensed table-bordered">
             <thead>
                 <tr>
-                    <th ng-repeat="field in fields" ng-model="field" ng-click="changeOrder(field)">{{field.Description}}
-                        <i ng-if="field.Order && field.Order == 'asc'" class="glyphicon glyphicon-chevron-down" style="float: right;"></i>
-                        <i ng-if="field.Order && field.Order == 'desc'" class="glyphicon glyphicon-chevron-up" style="float: right;"></i>
+                    <th ng-repeat="field in fields" ng-model="field" ng-click="changeOrder(field)">{{field.description}}
+                        <i ng-if="field.order && field.order == 'asc'" class="glyphicon glyphicon-chevron-down" style="float: right;"></i>
+                        <i ng-if="field.order && field.order == 'desc'" class="glyphicon glyphicon-chevron-up" style="float: right;"></i>
                     </th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="value in values | orderBy:Order">
-                    <td ng-repeat="field in fields" ng-model="value[field.Name]">
-                        <span ng-if="!field.Link">{{value[field.Name]}}</span>
-                        <a ng-if="field.Link" href="#editar/{{value[field.Name]}}">{{value[field.Name]}}</a>
+                <tr ng-repeat="value in values | orderBy:order">
+                    <td ng-repeat="field in fields" ng-model="value[field.name]">
+                        <span ng-if="!field.link">{{value[field.name]}}</span>
+                        <a ng-if="field.link" href="#editar/{{value[field.name]}}">{{value[field.name]}}</a>
                     </td>
                 </tr>
             </tbody>
 
         </table>
     </div>
-
     <div class="active">
-        <ul class="pagination">
-            <li><a href="#">&laquo;</a></li>
-            <li><a href="#">1</a></li>
-            <li><a href="#">2</a></li>
-            <li><a href="#">3</a></li>
-            <li><a href="#">4</a></li>
-            <li><a href="#">5</a></li>
-            <li><a href="#">&raquo;</a></li>
-        </ul>
-    </div>
-       
+        <pagination previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"
+             boundary-links="true" total-items="1000" max-size="10" on-select-page="setPage(page)" page="currentPage">
+        </pagination>      
+    </div>       
 </div>
 
