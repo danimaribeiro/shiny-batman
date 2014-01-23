@@ -50,8 +50,8 @@ namespace shiny_batman.Controllers
             {
                 title = modelo.Name,
                 model = modelo.TableName,
-                fields = (from p in modelo.Properties 
-                          select new { label = p.ShortDescription, model = p.Name, type = p.Type, required = p.Required, prefix = false}).ToList()
+                fields = (from p in modelo.Properties
+                          select new { label = p.ShortDescription, model = p.Name, type = p.Type, required = p.Required, prefix = false }).ToList()
             };
 
             return Json(retorno, JsonRequestBehavior.AllowGet);
@@ -63,8 +63,20 @@ namespace shiny_batman.Controllers
             var modelo = metadata.InspectModel(model);
 
             OrmBatman.Postgres.ModelQuery query = new OrmBatman.Postgres.ModelQuery();
-            var retorno = query.GetModel(modelo, id); 
+            var retorno = query.GetModel(modelo, id);
             return Json(retorno, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult SaveEntity(int id, string model, string jsonData)
+        {
+            OrmBatman.Postgres.PostgresMetadata metadata = new OrmBatman.Postgres.PostgresMetadata();
+            var modelo = metadata.InspectModel(model);
+
+            modelo = Newtonsoft.Json.JsonConvert.DeserializeAnonymousType(jsonData, modelo);
+
+            OrmBatman.Postgres.ModelQuery query = new OrmBatman.Postgres.ModelQuery();
+            query.Save(modelo, id);
+            return Json(modelo, JsonRequestBehavior.DenyGet);
         }
 
         protected override JsonResult Json(object data, string contentType, Encoding contentEncoding, JsonRequestBehavior behavior)

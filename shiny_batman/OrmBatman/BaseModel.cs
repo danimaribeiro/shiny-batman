@@ -5,7 +5,7 @@ using System.Web;
 
 namespace shiny_batman.OrmBatman
 {
-    public class BaseModel
+    public class BaseModel: Dictionary<string, object>
     {
         public BaseModel()
         {
@@ -20,6 +20,17 @@ namespace shiny_batman.OrmBatman
         private void InitializeProperties()
         {
             this.Properties = new List<Property>();
+        }
+
+        public virtual void Save(long id)
+        {
+            OrmBatman.Postgres.ModelQuery query = new Postgres.ModelQuery();
+            query.Save(this, id);
+        }
+
+        public virtual void Delete()
+        {
+
         }
     }
 }

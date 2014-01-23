@@ -17,5 +17,10 @@ namespace shiny_batman.OrmBatman
 
         public string RelatedModel { get; set; }
         public string RelatedColumn { get; set; }
+
+        public bool CanInsert { get; set; }
+        public bool CanUpdate { get; set; }
+
+        public object ActualValue { get; set; }
     }
 }

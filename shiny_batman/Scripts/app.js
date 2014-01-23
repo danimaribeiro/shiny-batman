@@ -118,6 +118,11 @@ function Editar($http, model, id) {
         self.entity = data;
     });
 
+    self.saveEntity = function () {        
+        $http.post('/Data/SaveEntity/' + self.entityId + '?model=' + self.model + '&data' + new Date().toLocaleTimeString(), { 'jsonData': angular.toJson(self.entity) }).success(function (data) {
+            alert('deu certo mano');
+        });
+    };
 }
 
 phonecatApp.controller('Tudo', ['$scope', '$http', '$routeParams', 'TabsData',

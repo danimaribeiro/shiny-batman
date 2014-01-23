@@ -85,5 +85,77 @@ namespace shiny_batman.OrmBatman.Postgres
             }
         }
 
+        public void Save(BaseModel model, long id)
+        {
+            string consulta = string.Empty;
+            if (id > 0)
+                consulta = GenerateUpdate(model, id);
+            else
+                consulta = GenerateInsert(model);
+
+            Npgsql.NpgsqlConnection conexao = new Npgsql.NpgsqlConnection("Server=127.0.0.1;Port=5432;Database=padrao;User ID=desenvolvimento;Password=12345;");            
+            Npgsql.NpgsqlCommand comando = new Npgsql.NpgsqlCommand(consulta, conexao);
+            try
+            {
+                foreach (var item in model.Properties)
+                {
+                    if (item.ActualValue != null)
+                    {
+                        if (id > 0 && item.CanUpdate && !item.IsPrimaryKey)
+                        {
+                            //TODO Adicionar os parametros conforme o tipo
+                        }
+                        else if (id <= 0 && item.CanInsert && !item.IsPrimaryKey)
+                        {
+                            //TODO Adicionar os parametros conforme o tipo
+                        }
+                    }
+                }
+                conexao.Open();
+                comando.ExecuteNonQuery();                
+            }
+            finally
+            {
+                conexao.Close();
+            }
+        }
+
+        public void Delete(BaseModel model, long id)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        private string GenerateInsert(BaseModel model)
+        {
+            string parameters = "";
+            string values = "";
+
+            foreach (var item in model.Properties)
+            {
+                item.ActualValue = model[item.Name];
+                if (item.CanInsert && !item.IsPrimaryKey)
+                {
+                    parameters += item.Name + ",";
+                    values += "@" + item.Name + ",";
+                }
+            }
+            return  string.Format( "insert into {0} ({1}) values ({2}) returning {3};", model.TableName, parameters, values, model.Properties[0].Name);
+        }
+
+        private string GenerateUpdate(BaseModel model, long id)
+        {
+            string parameters = "";
+            
+            foreach (var item in model.Properties)
+            {
+                item.ActualValue = model[item.Name];
+                if (item.CanUpdate && !item.IsPrimaryKey)
+                {
+                    parameters += item.Name + "=" + item.Name + ",";
+                }
+            }
+            return string.Format("update {0} set {1} where {2}", model.TableName, parameters, model.Properties[0].Name);
+        }
     }
 }
